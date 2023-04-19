@@ -7,6 +7,7 @@ import org.hibernate.Transaction;
 
 import com.hibernate.model.Ciudad;
 import com.hibernate.util.HibernateUtil;
+import com.mysql.cj.Query;
 
 public class CiudadDAO {
 
@@ -86,13 +87,55 @@ public class CiudadDAO {
 	 * SELECCIÓN MÚLTIPLE
 	 */
 	
-	public List<Ciudad> selectAllPerson() {
+	public List<Ciudad> selectAllCiudad() {
 		Transaction transaction = null;
 		List<Ciudad> ciudades = null;
 		Ciudad c = null;
 		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 			transaction = session.beginTransaction();
-			ciudades = session.createQuery("from Persona", Ciudad.class).getResultList();
+			ciudades = session.createQuery("from Ciudad", Ciudad.class).getResultList();
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		}
+		return ciudades;
+	}
+	
+	/**
+	 * SELECCIÓN MÚLTIPLE 1 MILLÓN DE HABITANTES
+	 */
+	
+	public List<Ciudad> selectCiudad1MHab() {
+		Transaction transaction = null;
+		List<Ciudad> ciudades = null;
+		Ciudad c = null;
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			transaction = session.beginTransaction();
+			ciudades = session.createQuery("from Ciudad where habitantes > 1000000", Ciudad.class).getResultList();
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		}
+		return ciudades;
+	}
+	
+	/**
+	 * SELECCIÓN MÚLTIPLE MENOS HABITANTES DE LOS QUE SE SELECCIONAN
+	 */
+	
+	public List<Ciudad> selectCiudadMenosMHab() {
+		Transaction transaction = null;
+		List<Ciudad> ciudades = null;
+		Ciudad c = null;
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			transaction = session.beginTransaction();
+			Query<Ciudad> query = session.createQuery("from Ciudad where habitantes < :menosHab", Ciudad.class);
+			query.setParameter("menosHab");
+			List<Ciudad> ciudadesMenosHab = query.getResultList();
 			transaction.commit();
 		} catch (Exception e) {
 			if (transaction != null) {
